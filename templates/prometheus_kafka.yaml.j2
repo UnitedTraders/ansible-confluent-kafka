@@ -1,0 +1,6 @@
+- targets:
+    - '{{ inventory_hostname }}:{{ kafka_metrics_port }}'
+  labels:
+    job: luna-services
+    team: luna
+    application: kafka

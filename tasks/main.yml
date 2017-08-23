@@ -1,0 +1,128 @@
+---
+# tasks file for confluent-kafka
+- name: add confluent dist repo
+  yum_repository:
+    name: confluent-dist
+    description: Confluent repository (dist)
+    baseurl: http://packages.confluent.io/rpm/3.3/7
+    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    gpgcheck: yes
+
+- name: add confluent main repo
+  yum_repository:
+    name: confluent-main
+    description: Confluent repository (main)
+    baseurl: http://packages.confluent.io/rpm/3.3
+    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    gpgcheck: yes
+
+- name: install needed packages
+  yum:
+    name: confluent-kafka-2.11
+    state: present
+
+- name: systemd start script
+  template:
+    src: kafka-systemd.j2
+    dest: /etc/systemd/system/kafka.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: systemctl daemon-reload
+  tags:
+    - kafka
+
+- meta: flush_handlers
+
+- name: Ensures that config dir exists
+  file:
+    path: "/etc/kafka"
+    state: directory
+    owner: kafka
+    group: kafka
+  notify: restart kafka
+  tags:
+    - kafka
+    - kafka_logs
+
+- name: Ensures that logs dir exists
+  file:
+    path: "/var/log/kafka"
+    state: directory
+    owner: kafka
+    group: kafka
+  notify: restart kafka
+  tags:
+    - kafka
+    - kafka_logs
+
+- name: Ensures that metrics dir exists
+  file:
+    path: "{{ kafka_dir }}/metrics"
+    state: directory
+    owner: kafka
+    group: kafka
+  notify: restart kafka
+  tags:
+    - kafka
+
+- name: Download prometheus jmx_exporter
+  get_url:
+    url: "{{ jmx_exporter_url }}"
+    owner: kafka
+    group: kafka
+    dest: "{{ kafka_dir }}/metrics/jmx_prometheus_javaagent.jar"
+    force: yes
+    mode: 0644
+  tags:
+    - kafka
+
+- name: Create metrics config
+  copy:
+    src: metrics.yaml
+    dest: "{{ kafka_dir }}/metrics/metrics.yaml"
+    owner: kafka
+    group: kafka
+    mode: 0644
+  notify: restart kafka
+  tags:
+    - kafka
+
+- name: Create log4j config
+  copy:
+    src: log4j.properties
+    dest: "{{ kafka_dir }}/log4j.properties"
+    owner: kafka
+    group: kafka
+    mode: 0644
+  notify: restart kafka
+  tags: kafka
+
+- name: Copy real config
+  template:
+    src: kafka-properties.j2
+    dest: "{{ kafka_dir }}/real-server.properties"
+  notify: restart kafka
+  tags: kafka
+
+- name: start kafka
+  service: name=kafka state=started enabled=yes
+# - name: Open kafka for outer world
+#   firewalld: port={{ kafka_port }}/tcp permanent=true state=enabled zone=public immediate=true
+
+- name: Open metrics endpoint for prometheus servers
+  firewalld:
+    rich_rule='rule family="ipv4" source address="{{ hostvars[item]['ansible_ssh_host'] }}/32" port port="{{ kafka_metrics_port }}" protocol="tcp" accept'
+    permanent=true
+    state=enabled
+    zone=public
+    immediate=true
+  with_items: "{{groups.prometheus | default([]) }}"
+
+
+- name: create prometheus job file for metrics checking
+  template: src=prometheus_kafka.yaml.j2 dest=/etc/prometheus/hosts/kafka-{{ inventory_hostname }}.yaml
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  notify: reload prometheus
+  with_items: "{{ groups.prometheus | default([]) }}"

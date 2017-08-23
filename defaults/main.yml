@@ -1,0 +1,16 @@
+---
+# defaults file for confluent-kafka
+kafka_data_dir: /var/lib/kafka
+kafka_dir: "/etc/kafka"
+kafka_port: 9092
+
+kafka_metrics_port: 9101
+jmx_exporter_url: 'https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.9/jmx_prometheus_javaagent-0.9.jar'
+
+kafka_hosts:
+  - host: "zookeeper-01.example.com" # the machine running
+    id: 1
+  - host: "zookeeper-02.example.com" # the machine running
+    id: 2
+  - host: "zookeeper-03.example.com" # the machine running
+    id: 3

@@ -1,0 +1,21 @@
+---
+# handlers file for confluent-kafka
+
+- name: start kafka
+  service: name=kafka state=started enabled=yes
+
+- name: restart kafka
+  service: name=kafka state=restarted enabled=yes
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  listen: "systemctl daemon-reload"
+
+- name: reload prometheus
+  uri:
+    url: http://localhost:9090/-/reload
+    method: POST
+  listen: "reload prometheus"
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  with_items: "{{ groups.prometheus | default([]) }}"
