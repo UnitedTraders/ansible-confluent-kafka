@@ -129,7 +129,7 @@ zookeeper.connect={% for zk_host in zookeeper_hosts %}{{ zk_host.host }}:{{ zook
 zookeeper.connection.timeout.ms=1000000
 
 {% if kafka_allow_topic_deletion == true %}
-delete.topic.enable = true
+delete.topic.enable=true
 {% endif %}
 
-default.replication.factor = {{ kafka_default_replication_factor }}
+default.replication.factor={{ kafka_default_replication_factor }}
