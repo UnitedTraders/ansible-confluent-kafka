@@ -1,5 +1,17 @@
 ---
 # tasks file for confluent-kafka
+- name: create group
+  group:
+    name: kafka
+    state: present
+  tags: kafka
+
+- name: create user
+  user:
+    name: kafka
+    group: kafka
+  tags: kafka
+
 - name: add confluent dist repo
   yum_repository:
     name: confluent-dist
