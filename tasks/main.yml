@@ -78,6 +78,16 @@
   tags:
     - kafka
 
+- name: Ensures data dir {{ kafka_data_dir }} exists
+  file:
+    path: "{{ kafka_data_dir }}"
+    state: directory
+    owner: kafka
+    group: kafka
+  notify: restart kafka
+  tags:
+    - kafka
+
 - name: Download prometheus jmx_exporter
   get_url:
     url: "{{ jmx_exporter_url }}"
