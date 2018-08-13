@@ -31,7 +31,7 @@
 - name: install needed packages
   yum:
     name: confluent-kafka-2.11
-    state: present
+    state: latest
 
 - name: systemd start script
   template:
