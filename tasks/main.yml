@@ -16,16 +16,16 @@
   yum_repository:
     name: confluent-dist
     description: Confluent repository (dist)
-    baseurl: http://packages.confluent.io/rpm/3.3/7
-    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    baseurl: http://packages.confluent.io/rpm/4.1/7
+    gpgkey: http://packages.confluent.io/rpm/4.1/archive.key
     gpgcheck: yes
 
 - name: add confluent main repo
   yum_repository:
     name: confluent-main
     description: Confluent repository (main)
-    baseurl: http://packages.confluent.io/rpm/3.3
-    gpgkey: http://packages.confluent.io/rpm/3.3/archive.key
+    baseurl: http://packages.confluent.io/rpm/4.1
+    gpgkey: http://packages.confluent.io/rpm/4.1/archive.key
     gpgcheck: yes
 
 - name: install needed packages
