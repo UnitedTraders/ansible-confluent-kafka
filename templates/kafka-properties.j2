@@ -132,6 +132,9 @@ zookeeper.connect={% for zk_host in zookeeper_hosts %}{{ zk_host.host }}:{{ zook
 # Timeout in ms for connecting to zookeeper
 zookeeper.connection.timeout.ms=1000000
 
+# Offset retention period
+offsets.retention.minutes=5184000
+
 {% if kafka_allow_topic_deletion == true %}
 delete.topic.enable=true
 {% endif %}
